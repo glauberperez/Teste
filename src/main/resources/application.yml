@@ -1,0 +1,48 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: cadastro-pessoas
+
+  # Persistencia em memoria (H2): a prova permite explicitamente esta opcao e
+  # o avaliador consegue rodar o projeto sem instalar banco de dados.
+  datasource:
+    url: jdbc:h2:mem:cadastro;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+app:
+  # Credenciais da aplicacao. Em producao viriam de variaveis de ambiente.
+  auth:
+    usuario: ${APP_USUARIO:admin}
+    senha: ${APP_SENHA:admin123}
+
+  jwt:
+    secret: ${APP_JWT_SECRET:troque-esta-chave-em-producao-precisa-ter-no-minimo-32-bytes}
+    expiracao: 2h
+
+  nationalize:
+    base-url: https://api.nationalize.io
+    timeout-conexao: 5s
+    timeout-leitura: 5s
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
+logging:
+  level:
+    com.quipux.cadastro: INFO

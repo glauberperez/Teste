@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Pessoas</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header>
+    <h1>Cadastro de Pessoas</h1>
+    <div id="sessao" class="sessao oculto">
+        <span id="usuarioLogado"></span>
+        <button id="btnSair" class="secundario">Sair</button>
+    </div>
+</header>
+
+<main>
+    <!-- 1. Login -->
+    <section id="secaoLogin" class="cartao">
+        <h2>Autenticacao</h2>
+        <p class="ajuda">A API exige token JWT. Credenciais padrao: <code>admin</code> / <code>admin123</code>.</p>
+        <form id="formLogin">
+            <label for="usuario">Usuario</label>
+            <input type="text" id="usuario" value="admin" required>
+
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" value="admin123" required>
+
+            <button type="submit">Entrar</button>
+        </form>
+    </section>
+
+    <!-- 2. Cadastro -->
+    <section id="secaoCadastro" class="cartao oculto">
+        <h2>Registrar pessoa</h2>
+        <p class="ajuda">POST <code>/registrarName</code></p>
+        <form id="formPessoa">
+            <div class="linha">
+                <div>
+                    <label for="documento">Documento (CPF, so numeros)</label>
+                    <input type="text" id="documento" maxlength="11" placeholder="52998224725" required>
+                </div>
+                <div>
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" placeholder="pessoa@exemplo.com" required>
+                </div>
+            </div>
+            <div class="linha">
+                <div>
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" placeholder="Nathaniel" required>
+                </div>
+                <div>
+                    <label for="sobrenome">Sobrenome</label>
+                    <input type="text" id="sobrenome" placeholder="Silva" required>
+                </div>
+            </div>
+            <button type="submit">Registrar</button>
+        </form>
+    </section>
+
+    <!-- 3. Listagem -->
+    <section id="secaoLista" class="cartao oculto">
+        <div class="cabecalho-secao">
+            <h2>Pessoas registradas</h2>
+            <button id="btnAtualizar" class="secundario">Atualizar</button>
+        </div>
+        <p class="ajuda">GET <code>/list</code> &middot; GET <code>/findNacionalityByPerson/{documento}</code> &middot; DELETE <code>/list/{documento}</code></p>
+        <table>
+            <thead>
+            <tr>
+                <th>Documento</th>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Acoes</th>
+            </tr>
+            </thead>
+            <tbody id="corpoTabela"></tbody>
+        </table>
+        <p id="listaVazia" class="ajuda oculto">Nenhuma pessoa registrada ainda.</p>
+    </section>
+
+    <!-- 4. Resultado da nacionalidade -->
+    <section id="secaoNacionalidade" class="cartao oculto">
+        <h2>Previsao de nacionalidade</h2>
+        <div id="resultadoNacionalidade"></div>
+    </section>
+</main>
+
+<div id="alerta" class="alerta oculto"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
