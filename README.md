@@ -1,3 +1,7 @@
+| `409` | Documento ou e-mail já cadastrado |
+| `415` | `Content-Type` diferente de `application/json` |
+| `404` | Documento ou rota não encontrada |
+| `405` | Método HTTP não suportado no recurso |
 # API de Cadastro de Pessoas
 
 Prova técnica — API REST em Java 21 / Spring Boot 3.5 para cadastro de pessoas, com previsão de
@@ -163,9 +167,15 @@ Todos os erros saem no mesmo formato JSON:
 | --- | --- |
 | `400` | Falha de validação (corpo, path ou query) |
 | `401` | Sem token, token inválido ou expirado; credenciais erradas no login |
-| `404` | Documento não encontrado |
+| `404` | Documento não encontrado, ou rota inexistente |
+| `405` | Método HTTP não suportado no recurso |
 | `409` | Documento ou e-mail já cadastrado |
+| `415` | `Content-Type` diferente de `application/json` |
 | `503` | API pública de nacionalidade indisponível |
+
+Nenhum erro de protocolo cai em `500`: o handler global estende `ResponseEntityExceptionHandler`,
+então as exceções padrão do Spring MVC preservam o status correto, sempre no mesmo corpo JSON e sem
+vazar stack trace.
 
 ---
 
@@ -205,7 +215,7 @@ O token fica em `sessionStorage` e é enviado no header `Authorization` a cada r
 - `CpfValidatorTest` — validação de CPF (casos válidos, dígito errado, tamanho, sequência repetida).
 - `NacionalidadeServiceTest` — conversão ISO → nome do país, ordenação por probabilidade e ausência de previsão.
 - `PessoaApiIntegrationTest` — todos os endpoints de ponta a ponta, passando pela cadeia real do
-  Spring Security (401 sem token, 201, 400, 404, 409, 204).
+  Spring Security (401 sem token, 201, 400, 404, 405, 409, 415, 204).
 
 A API pública **não** é chamada durante os testes: o cliente HTTP é substituído por um mock.
 

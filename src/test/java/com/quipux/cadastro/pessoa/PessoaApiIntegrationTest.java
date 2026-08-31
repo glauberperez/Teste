@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -264,5 +265,60 @@ class PessoaApiIntegrationTest {
         mockMvc.perform(get("/findNacionalityByPerson/" + CPF)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound());
+    }
+
+    /* ---------- erros de protocolo (nao podem virar 500) ---------- */
+
+    @Test
+    @DisplayName("metodo HTTP nao suportado responde 405, nao 500")
+    void metodoNaoSuportadoRetorna405() throws Exception {
+        mockMvc.perform(put("/list/" + CPF)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.mensagem").value("O metodo PUT nao e suportado neste recurso"));
+    }
+
+    @Test
+    @DisplayName("content-type nao suportado responde 415, nao 500")
+    void contentTypeNaoSuportadoRetorna415() throws Exception {
+        mockMvc.perform(post("/registrarName")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content(pessoaJson(CPF, "Nathaniel", "Silva", "n@exemplo.com")))
+                .andExpect(status().isUnsupportedMediaType())
+                .andExpect(jsonPath("$.status").value(415));
+    }
+
+    @Test
+    @DisplayName("rota inexistente responde 404, nao 500")
+    void rotaInexistenteRetorna404() throws Exception {
+        mockMvc.perform(get("/rota-que-nao-existe").header("Authorization", "Bearer " + token))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("parametro com tipo errado responde 400, nao 500")
+    void parametroComTipoErradoRetorna400() throws Exception {
+        mockMvc.perform(get("/list").param("limite", "abc")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos.limite").exists());
+    }
+
+    @Test
+    @DisplayName("campos desconhecidos no JSON sao ignorados")
+    void camposDesconhecidosSaoIgnorados() throws Exception {
+        String corpo = """
+                {"documento":"%s","nome":"Nathaniel","sobrenome":"Silva",
+                 "email":"n@exemplo.com","id":999,"admin":true}""".formatted(CPF);
+
+        mockMvc.perform(post("/registrarName")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(corpo))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(org.hamcrest.Matchers.not(999)));
     }
 }
