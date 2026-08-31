@@ -4,10 +4,8 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 public class CpfValidator implements ConstraintValidator<Cpf, String> {
-
     @Override
     public boolean isValid(String valor, ConstraintValidatorContext context) {
-        // @NotBlank e responsavel por rejeitar nulo/vazio; aqui so validamos o formato.
         if (valor == null || valor.isBlank()) {
             return true;
         }
@@ -18,8 +16,7 @@ public class CpfValidator implements ConstraintValidator<Cpf, String> {
         if (cpf == null || !cpf.matches("\\d{11}")) {
             return false;
         }
-        // Sequencias repetidas (00000000000, 11111111111, ...) passam no modulo 11,
-        // mas nao sao CPFs validos.
+
         if (cpf.chars().distinct().count() == 1) {
             return false;
         }

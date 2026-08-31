@@ -12,7 +12,6 @@ public record ErroResponse(
         String mensagem,
         String caminho,
         Map<String, String> campos) {
-
     public static ErroResponse de(int status, String erro, String mensagem, String caminho) {
         return new ErroResponse(LocalDateTime.now(), status, erro, mensagem, caminho, null);
     }

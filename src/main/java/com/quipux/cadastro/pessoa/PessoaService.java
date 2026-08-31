@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PessoaService {
-
     private final PessoaRepository repository;
 
     public PessoaService(PessoaRepository repository) {

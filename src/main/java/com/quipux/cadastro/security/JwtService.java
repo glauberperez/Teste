@@ -13,10 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-/** Geracao e validacao dos tokens JWT (assinatura HMAC-SHA256). */
 @Service
 public class JwtService {
-
     private static final Logger log = LoggerFactory.getLogger(JwtService.class);
 
     private final SecretKey chave;
@@ -38,7 +36,6 @@ public class JwtService {
                 .compact();
     }
 
-    /** Devolve o usuario do token, ou {@code null} se o token for invalido/expirado. */
     public String extrairUsuario(String token) {
         try {
             return Jwts.parser()

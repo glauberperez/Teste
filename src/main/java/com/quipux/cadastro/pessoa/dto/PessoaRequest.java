@@ -6,16 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-/**
- * Corpo do POST /registrarName.
- *
- * <p>Validacoes de tipo de dado exigidas pela prova:
- * <ul>
- *   <li>documento: obrigatorio + CPF valido (regra de negocio, modulo 11);</li>
- *   <li>nome/sobrenome: obrigatorios, tamanho limitado e apenas letras;</li>
- *   <li>email: obrigatorio e em formato de e-mail.</li>
- * </ul>
- */
 public record PessoaRequest(
 
         @NotBlank(message = "documento e obrigatorio")

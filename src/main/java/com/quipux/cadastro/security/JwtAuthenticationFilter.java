@@ -13,12 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/**
- * Le o header {@code Authorization: Bearer <token>} e, se o token for valido,
- * autentica a requisicao no contexto do Spring Security.
- */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
     private static final String PREFIXO_BEARER = "Bearer ";
 
     private final JwtService jwtService;
@@ -32,7 +27,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
-
         String header = request.getHeader("Authorization");
         if (header == null || !header.startsWith(PREFIXO_BEARER)) {
             filterChain.doFilter(request, response);

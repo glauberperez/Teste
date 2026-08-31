@@ -1,163 +1,72 @@
-| `409` | Documento ou e-mail já cadastrado |
-| `415` | `Content-Type` diferente de `application/json` |
-| `404` | Documento ou rota não encontrada |
-| `405` | Método HTTP não suportado no recurso |
 # API de Cadastro de Pessoas
 
-Prova técnica — API REST em Java 21 / Spring Boot 3.5 para cadastro de pessoas, com previsão de
-nacionalidade a partir de uma API pública, autenticação via JWT e interface web para consumo.
+Prova técnica — Java 21 / Spring Boot 3.5, H2 em memória, autenticação JWT e interface web.
 
----
+## Rodar
 
-## Como executar
-
-Pré-requisito: **JDK 21** (nada além disso — o banco é em memória).
+Precisa apenas do **JDK 21**:
 
 ```bash
-./mvnw spring-boot:run          # Linux / macOS
-mvnw.cmd spring-boot:run        # Windows
+mvnw.cmd spring-boot:run     # Windows
+./mvnw spring-boot:run       # Linux / macOS
 ```
 
-A aplicação sobe em <http://localhost:8080>.
+Sobe em `http://localhost:8080` já com 3 pessoas cadastradas.
 
-| Recurso | URL |
+**Login:** `admin` / `admin123`
+
+## URLs para testar
+
+| | |
 | --- | --- |
-| Interface web | <http://localhost:8080> |
-| Swagger UI | <http://localhost:8080/swagger-ui.html> |
-| Console do H2 | <http://localhost:8080/h2-console> (JDBC URL `jdbc:h2:mem:cadastro`, usuário `sa`, sem senha) |
+| Interface web | http://localhost:8080 |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+| Console do H2 | http://localhost:8080/h2-console |
 
-**Credenciais da API:** `admin` / `admin123`
+No Swagger: faça `POST /auth/login`, copie o `token` e cole no botão **Authorize**.
+No H2: JDBC URL `jdbc:h2:mem:cadastro`, usuário `sa`, senha em branco.
 
-A aplicação já sobe com 3 pessoas de exemplo cadastradas.
+**CPFs válidos para teste:** `52998224725` · `11144477735` · `39053344705` · `12345678909`
 
----
+## Rotas
 
-## Requisitos da prova e onde foram atendidos
+Todas exigem `Authorization: Bearer <token>`, exceto o login.
 
-| Requisito | Implementação |
-| --- | --- |
-| `POST /registrarName` — registra pessoa (documento, nome, sobrenome, e-mail) | `PessoaController.registrar` |
-| `GET /list` — lista as pessoas | `PessoaController.listar` |
-| `GET /list/{parâmetro}` — consulta uma pessoa | `PessoaController.buscar` — parâmetro = **documento** |
-| `DELETE /list/{parâmetro}` — exclui uma pessoa | `PessoaController.excluir` |
-| `GET /findNacionalityByPerson/{parâmetro}` — nacionalidade provável | `NacionalidadeController.prever` |
-| Ao menos uma validação de tipo de dado **por API** | Ver seção *Validações* |
-| Sistema de autenticação | JWT (`Bearer`) em **todas** as APIs de negócio — `SecurityConfig` |
-| Interface web consumindo ao menos uma API | Página em `src/main/resources/static` (consome todas) |
-| Sistema de persistência | H2 em memória + Spring Data JPA |
+| Método | Rota | O que faz | Validação |
+| --- | --- | --- | --- |
+| `POST` | `/auth/login` | Devolve o token JWT (validade de 2h) | usuário e senha obrigatórios, tamanho mínimo |
+| `POST` | `/registrarName` | Cadastra pessoa: documento, nome, sobrenome e e-mail | CPF válido, e-mail em formato válido, nome só com letras |
+| `GET` | `/list` | Lista as pessoas cadastradas | `?limite=` entre 1 e 200 |
+| `GET` | `/list/{documento}` | Dados de uma pessoa | CPF válido |
+| `DELETE` | `/list/{documento}` | Exclui uma pessoa | CPF válido |
+| `GET` | `/findNacionalityByPerson/{documento}` | Nacionalidade provável, via `api.nationalize.io` | CPF válido |
 
-### Escolha do parâmetro
+O parâmetro escolhido para identificar a pessoa é o **documento (CPF)**.
 
-O parâmetro das rotas `/list/{...}` é o **documento (CPF)**. É o identificador natural da pessoa,
-é estável e — diferente de um id sequencial — permite uma validação de formato real, que a prova
-pede em cada endpoint.
+A API pública devolve só o código ISO (`US`); a aplicação converte para o nome do país
+(`Estados Unidos`) usando `Locale` do JDK.
 
----
-
-## Endpoints
-
-### 1. Autenticação
+### Exemplos
 
 ```bash
-curl -X POST http://localhost:8080/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"usuario":"admin","senha":"admin123"}'
-```
+  -d '{"usuario":"admin","senha":"admin123"}' | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
 
-```json
-{ "token": "eyJhbGciOiJIUzM4NCJ9...", "tipo": "Bearer", "expiraEmSegundos": 7200 }
-```
-
-Guarde o token para as demais chamadas:
-
-```bash
-TOKEN="cole-o-token-aqui"
-```
-
-### 2. Registrar pessoa
-
-```bash
-curl -X POST http://localhost:8080/registrarName \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"documento":"52998224725","nome":"Nathaniel","sobrenome":"Silva","email":"nathaniel@exemplo.com"}'
-```
-
-`201 Created`, com header `Location: /list/52998224725`.
-
-### 3. Listar pessoas
-
-```bash
 curl http://localhost:8080/list -H "Authorization: Bearer $TOKEN"
-curl "http://localhost:8080/list?limite=10" -H "Authorization: Bearer $TOKEN"
+
+curl -X POST http://localhost:8080/registrarName \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"documento":"12345678909","nome":"Nathaniel","sobrenome":"Silva","email":"n@exemplo.com"}'
+
+curl http://localhost:8080/findNacionalityByPerson/12345678909 -H "Authorization: Bearer $TOKEN"
+
+curl -X DELETE http://localhost:8080/list/12345678909 -H "Authorization: Bearer $TOKEN"
 ```
 
-### 4. Consultar uma pessoa
+## Respostas de erro
 
-```bash
-curl http://localhost:8080/list/52998224725 -H "Authorization: Bearer $TOKEN"
-```
-
-### 5. Excluir uma pessoa
-
-```bash
-curl -X DELETE http://localhost:8080/list/52998224725 -H "Authorization: Bearer $TOKEN"
-```
-
-`204 No Content`.
-
-### 6. Previsão de nacionalidade
-
-```bash
-curl http://localhost:8080/findNacionalityByPerson/52998224725 -H "Authorization: Bearer $TOKEN"
-```
-
-```json
-{
-  "documento": "52998224725",
-  "nome": "Nathaniel",
-  "nacionalidadeProvavel": { "codigoIso": "US", "pais": "Estados Unidos", "probabilidade": 0.09 },
-  "outrasPossibilidades": [
-    { "codigoIso": "GB", "pais": "Reino Unido", "probabilidade": 0.07 }
-  ]
-}
-```
-
-A API pública <https://api.nationalize.io> devolve apenas o **código ISO** (`US`). A prova pede o
-**nome** da nacionalidade, então a conversão ISO → nome do país é feita pela aplicação, em
-`NacionalidadeService.nomeDoPais`, usando `Locale` do próprio JDK — sem tabela hardcoded e sem
-dependência extra.
-
----
-
-## Validações
-
-Cada endpoint tem pelo menos uma validação de tipo de dado, como exigido, e o conjunto exercita
-**seis categorias distintas** de validação — obrigatoriedade, formato, faixa numérica, tamanho,
-regra de negócio e tipo do parâmetro:
-
-| Endpoint | Categoria demonstrada | Validações |
-| --- | --- | --- |
-| `POST /registrarName` | formato + obrigatoriedade + tamanho | `documento`: obrigatório + **CPF válido** (dígitos verificadores, módulo 11) · `nome`/`sobrenome`: obrigatórios, 2–60 caracteres, apenas letras · `email`: obrigatório e em formato de e-mail |
-| `GET /list` | faixa numérica | `limite`: inteiro entre 1 e 200 |
-| `GET /list/{documento}` | padrão definido em variável de rota | `documento`: obrigatório + CPF válido |
-| `DELETE /list/{documento}` | padrão definido em variável de rota | `documento`: obrigatório + CPF válido |
-| `GET /findNacionalityByPerson/{documento}` | padrão definido em variável de rota | `documento`: obrigatório + CPF válido |
-| `POST /auth/login` | obrigatoriedade + tamanho | `usuario`: obrigatório, até 60 caracteres · `senha`: obrigatória, 4–100 caracteres |
-
-Além das anotações acima, o tipo do parâmetro de query também é validado: `?limite=abc` responde
-`400`, e não `500`.
-
-A validação de CPF é uma constraint customizada (`@Cpf` + `CpfValidator`), não apenas um regex:
-ela confere os dígitos verificadores e rejeita sequências repetidas como `11111111111`. As três
-rotas por documento compartilham essa mesma constraint de propósito — é o mesmo dado de entrada,
-e duplicar regras equivalentes só para diferenciá-las abriria espaço para divergência futura.
-
-**CPFs válidos para teste:** `52998224725`, `11144477735`, `39053344705`.
-
-### Respostas de erro
-
-Todos os erros saem no mesmo formato JSON:
+Formato único em todos os casos, sem vazar stack trace:
 
 ```json
 {
@@ -166,91 +75,36 @@ Todos os erros saem no mesmo formato JSON:
   "erro": "Requisicao invalida",
   "mensagem": "Um ou mais campos estao invalidos",
   "caminho": "/registrarName",
-  "campos": { "documento": "documento invalido: informe um CPF valido (11 digitos, sem pontuacao)" }
+  "campos": { "documento": "documento invalido: informe um CPF valido" }
 }
 ```
 
-| Status | Quando |
-| --- | --- |
-| `400` | Falha de validação (corpo, path ou query) |
-| `401` | Sem token, token inválido ou expirado; credenciais erradas no login |
-| `404` | Documento não encontrado, ou rota inexistente |
-| `405` | Método HTTP não suportado no recurso |
-| `409` | Documento ou e-mail já cadastrado |
-| `415` | `Content-Type` diferente de `application/json` |
-| `503` | API pública de nacionalidade indisponível |
-
-Nenhum erro de protocolo cai em `500`: o handler global estende `ResponseEntityExceptionHandler`,
-então as exceções padrão do Spring MVC preservam o status correto, sempre no mesmo corpo JSON e sem
-vazar stack trace.
-
----
-
-## Autenticação
-
-- **Todas** as APIs de negócio exigem `Authorization: Bearer <token>`.
-- O token é um JWT assinado com HMAC-SHA (HS384, escolhido pela jjwt conforme o tamanho da chave), com validade de 2 horas.
-- Públicos apenas: `POST /auth/login`, os arquivos estáticos da interface, o Swagger e o console do H2.
-- A senha do usuário fica em memória com hash BCrypt.
-
-Usuário, senha e segredo do JWT são configuráveis por variáveis de ambiente
-(`APP_USUARIO`, `APP_SENHA`, `APP_JWT_SECRET`) — os valores do `application.yml` são apenas defaults
-de desenvolvimento.
-
----
-
-## Interface web
-
-Página única em HTML + JavaScript, servida pelo próprio Spring Boot (sem Node, sem build). Permite:
-
-1. autenticar e obter o token;
-2. registrar uma pessoa, com os erros de validação da API exibidos campo a campo;
-3. listar as pessoas registradas;
-4. consultar a nacionalidade provável de cada uma, com as probabilidades;
-5. excluir uma pessoa.
-
-O token fica em `sessionStorage` e é enviado no header `Authorization` a cada requisição.
-
----
+`400` validação · `401` sem token ou credenciais erradas · `404` não encontrado ·
+`405` método errado · `409` documento ou e-mail duplicado · `415` content-type errado ·
+`503` API de nacionalidade fora do ar
 
 ## Testes
 
 ```bash
-./mvnw test
+mvnw.cmd test
 ```
 
-- `CpfValidatorTest` — validação de CPF (casos válidos, dígito errado, tamanho, sequência repetida).
-- `NacionalidadeServiceTest` — conversão ISO → nome do país, ordenação por probabilidade e ausência de previsão.
-- `PessoaApiIntegrationTest` — todos os endpoints de ponta a ponta, passando pela cadeia real do
-  Spring Security (401 sem token, 201, 400, 404, 405, 409, 415, 204).
-
-A API pública **não** é chamada durante os testes: o cliente HTTP é substituído por um mock.
-
----
+39 testes: validação de CPF, conversão ISO → país e todos os endpoints de ponta a ponta
+passando pela cadeia real do Spring Security. A API pública não é chamada nos testes.
 
 ## Estrutura
 
 ```
 src/main/java/com/quipux/cadastro
-├── config/          RestClient, OpenAPI e carga inicial de dados
-├── exception/       Exceções de negócio e handler global (@RestControllerAdvice)
+├── config/          RestClient, OpenAPI e carga inicial
+├── exception/       Exceções e handler global
 ├── nacionalidade/   Cliente da API pública, serviço e controller
 ├── pessoa/          Entidade, repositório, serviço, controller e DTOs
-├── security/        JWT, filtro de autenticação e configuração do Spring Security
+├── security/        JWT e configuração do Spring Security
 └── validation/      Constraint customizada @Cpf
 src/main/resources/static   Interface web (HTML, CSS e JS)
 ```
 
----
-
-## Decisões técnicas
-
-- **H2 em memória**: a prova permite explicitamente armazenamento em memória, e assim o projeto roda
-  com um único comando, sem instalar banco. Trocar por PostgreSQL exige apenas alterar o
-  `application.yml` e a dependência — nenhuma mudança de código.
-- **JWT em vez de HTTP Basic**: stateless, e é o formato que a interface web consome naturalmente.
-- **Documento como parâmetro** das rotas: identificador natural e validável.
-- **Timeouts explícitos** na chamada à API externa (5s), para que uma indisponibilidade de terceiro
-  não prenda requisições da nossa API; a falha vira `503` com mensagem clara.
-- **Conversão ISO → país via `Locale`**: usa a base de dados do próprio JDK, sem tabela manual.
-- **Sem Lombok**: menos uma dependência para o avaliador precisar configurar na IDE.
+A validação de CPF confere os dígitos verificadores (módulo 11), não é apenas um regex.
+Usuário, senha e segredo do JWT são sobrescrevíveis por `APP_USUARIO`, `APP_SENHA` e
+`APP_JWT_SECRET`.

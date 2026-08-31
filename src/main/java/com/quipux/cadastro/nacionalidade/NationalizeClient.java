@@ -8,10 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
-/** Cliente HTTP da API publica de previsao de nacionalidade. */
 @Component
 public class NationalizeClient {
-
     private static final Logger log = LoggerFactory.getLogger(NationalizeClient.class);
 
     private final RestClient restClient;

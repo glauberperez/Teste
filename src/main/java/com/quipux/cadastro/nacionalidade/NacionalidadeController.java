@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Nacionalidade", description = "Previsao de nacionalidade a partir do nome da pessoa")
 @SecurityRequirement(name = "bearerAuth")
 public class NacionalidadeController {
-
     private final NacionalidadeService service;
 
     public NacionalidadeController(NacionalidadeService service) {

@@ -10,14 +10,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-/**
- * Popula o banco em memoria com alguns registros para facilitar a avaliacao.
- * Desativado no perfil de teste.
- */
 @Configuration
 @Profile("!test")
 public class CargaInicial {
-
     private static final Logger log = LoggerFactory.getLogger(CargaInicial.class);
 
     @Bean

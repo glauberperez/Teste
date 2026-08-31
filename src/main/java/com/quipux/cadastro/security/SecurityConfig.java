@@ -19,17 +19,10 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/**
- * Todas as APIs de negocio exigem um token JWT valido.
- *
- * <p>Ficam publicos apenas: o endpoint de login, a interface web estatica,
- * a documentacao OpenAPI e o console do H2.
- */
 @Configuration
 @EnableWebSecurity
 @EnableConfigurationProperties({JwtProperties.class, AuthProperties.class})
 public class SecurityConfig {
-
     private static final String[] ROTAS_PUBLICAS = {
             "/auth/login",
             "/", "/index.html", "/app.js", "/estilos.css", "/favicon.ico",
@@ -40,9 +33,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtService jwtService,
             UserDetailsService userDetailsService, ObjectMapper objectMapper) throws Exception {
-
-        // instanciado aqui (e nao como @Component) para que o Spring Boot nao
-        // registre o filtro tambem fora da cadeia do Spring Security
         var jwtFilter = new JwtAuthenticationFilter(jwtService, userDetailsService);
 
         http

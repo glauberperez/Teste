@@ -8,7 +8,6 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class CpfValidatorTest {
-
     @ParameterizedTest
     @ValueSource(strings = {"52998224725", "11144477735", "39053344705"})
     @DisplayName("aceita CPFs com digitos verificadores corretos")
@@ -18,12 +17,12 @@ class CpfValidatorTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "52998224726",   // digito verificador errado
-            "1114447773",    // 10 digitos
-            "111444777351",  // 12 digitos
-            "529.982.247-25", // com pontuacao
-            "abcdefghijk",   // nao numerico
-            "11111111111",   // sequencia repetida
+            "52998224726",
+            "1114447773",
+            "111444777351",
+            "529.982.247-25",
+            "abcdefghijk",
+            "11111111111",
             "00000000000"
     })
     @DisplayName("rejeita CPFs invalidos")

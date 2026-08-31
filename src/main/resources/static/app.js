@@ -1,8 +1,3 @@
-/*
- * Interface web que consome as APIs do projeto.
- * Sem framework nem build: apenas fetch + DOM.
- */
-
 const CHAVE_TOKEN = 'cadastro-pessoas.token';
 const CHAVE_USUARIO = 'cadastro-pessoas.usuario';
 
@@ -31,8 +26,6 @@ const estado = {
     }
 };
 
-/* ---------- utilidades ---------- */
-
 let timerAlerta;
 
 function avisar(mensagem, tipo = 'sucesso') {
@@ -43,7 +36,6 @@ function avisar(mensagem, tipo = 'sucesso') {
     timerAlerta = setTimeout(() => alerta.classList.add('oculto'), 5000);
 }
 
-/** Transforma o corpo de erro padronizado da API em uma mensagem legivel. */
 function mensagemDeErro(corpo, status) {
     if (!corpo) {
         return `Erro ${status}`;
@@ -80,8 +72,6 @@ async function chamarApi(caminho, opcoes = {}) {
     }
     return corpo;
 }
-
-/* ---------- sessao ---------- */
 
 function mostrarAreaLogada(logado) {
     el('secaoLogin').classList.toggle('oculto', logado);
@@ -122,8 +112,6 @@ el('btnSair').addEventListener('click', () => {
     avisar('Sessao encerrada.');
 });
 
-/* ---------- cadastro ---------- */
-
 el('formPessoa').addEventListener('submit', async (evento) => {
     evento.preventDefault();
     const pessoa = {
@@ -141,8 +129,6 @@ el('formPessoa').addEventListener('submit', async (evento) => {
         avisar(erro.message, 'erro');
     }
 });
-
-/* ---------- listagem ---------- */
 
 el('btnAtualizar').addEventListener('click', () => carregarPessoas());
 
@@ -205,8 +191,6 @@ async function excluir(pessoa) {
     }
 }
 
-/* ---------- nacionalidade ---------- */
-
 async function consultarNacionalidade(documento) {
     const secao = el('secaoNacionalidade');
     const destino = el('resultadoNacionalidade');
@@ -265,8 +249,6 @@ function criarBarra(nacionalidade, destaque) {
     bloco.append(rotulo, barra);
     return bloco;
 }
-
-/* ---------- inicializacao ---------- */
 
 if (estado.token) {
     el('usuarioLogado').textContent = `Conectado como ${estado.usuario}`;

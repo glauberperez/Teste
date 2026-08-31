@@ -26,15 +26,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-/**
- * Testes de ponta a ponta dos endpoints exigidos pela prova, passando pela
- * cadeia real do Spring Security.
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class PessoaApiIntegrationTest {
-
     private static final String CPF = "52998224725";
     private static final String CPF_OUTRO = "11144477735";
 
@@ -47,7 +42,6 @@ class PessoaApiIntegrationTest {
     @Autowired
     private PessoaRepository repository;
 
-    /** A API externa nao e chamada de verdade nos testes. */
     @MockitoBean
     private NationalizeClient nationalizeClient;
 
@@ -88,8 +82,6 @@ class PessoaApiIntegrationTest {
                 .andExpect(status().isCreated());
     }
 
-    /* ---------- autenticacao ---------- */
-
     @Test
     @DisplayName("sem token, as APIs respondem 401")
     void semTokenRetorna401() throws Exception {
@@ -118,8 +110,6 @@ class PessoaApiIntegrationTest {
                         .content(json("usuario", "admin", "senha", "senha-errada")))
                 .andExpect(status().isUnauthorized());
     }
-
-    /* ---------- POST /registrarName ---------- */
 
     @Test
     @DisplayName("POST /registrarName cria a pessoa e devolve 201")
@@ -170,8 +160,6 @@ class PessoaApiIntegrationTest {
                 .andExpect(status().isConflict());
     }
 
-    /* ---------- GET /list ---------- */
-
     @Test
     @DisplayName("GET /list devolve as pessoas registradas")
     void listarPessoas() throws Exception {
@@ -191,8 +179,6 @@ class PessoaApiIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.campos.limite").exists());
     }
-
-    /* ---------- GET e DELETE /list/{documento} ---------- */
 
     @Test
     @DisplayName("GET /list/{documento} devolve a pessoa")
@@ -238,8 +224,6 @@ class PessoaApiIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
-    /* ---------- GET /findNacionalityByPerson/{documento} ---------- */
-
     @Test
     @DisplayName("GET /findNacionalityByPerson devolve o nome do pais, nao o codigo ISO")
     void preverNacionalidade() throws Exception {
@@ -266,8 +250,6 @@ class PessoaApiIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound());
     }
-
-    /* ---------- erros de protocolo (nao podem virar 500) ---------- */
 
     @Test
     @DisplayName("metodo HTTP nao suportado responde 405, nao 500")

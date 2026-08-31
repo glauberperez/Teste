@@ -10,7 +10,6 @@ public record PessoaResponse(
         String sobrenome,
         String email,
         LocalDateTime criadoEm) {
-
     public static PessoaResponse de(Pessoa pessoa) {
         return new PessoaResponse(
                 pessoa.getId(),

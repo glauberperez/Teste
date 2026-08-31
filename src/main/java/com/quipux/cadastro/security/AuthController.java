@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 @Tag(name = "Autenticacao", description = "Emissao do token JWT")
 public class AuthController {
-
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 

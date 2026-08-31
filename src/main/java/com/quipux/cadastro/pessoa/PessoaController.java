@@ -22,20 +22,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Endpoints de cadastro de pessoas.
- *
- * <p>O parametro escolhido para identificar uma pessoa nas rotas /list/{documento}
- * e o <b>documento (CPF)</b>, por ser o identificador natural e nao sequencial.
- *
- * <p>{@code @Validated} habilita a validacao dos parametros de rota e de query.
- */
 @RestController
 @Validated
 @Tag(name = "Pessoas", description = "Cadastro, consulta e exclusao de pessoas")
 @SecurityRequirement(name = "bearerAuth")
 public class PessoaController {
-
     private final PessoaService service;
 
     public PessoaController(PessoaService service) {

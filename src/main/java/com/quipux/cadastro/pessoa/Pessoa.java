@@ -11,12 +11,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "pessoa")
 public class Pessoa {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** Documento (CPF, somente digitos). E o parametro usado nas rotas /list/{documento}. */
     @Column(nullable = false, unique = true, length = 11)
     private String documento;
 
@@ -33,7 +31,6 @@ public class Pessoa {
     private LocalDateTime criadoEm;
 
     protected Pessoa() {
-        // exigido pelo JPA
     }
 
     public Pessoa(String documento, String nome, String sobrenome, String email) {

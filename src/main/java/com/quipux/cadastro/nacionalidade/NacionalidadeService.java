@@ -13,10 +13,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class NacionalidadeService {
-
     private static final Locale IDIOMA_EXIBICAO = Locale.forLanguageTag("pt-BR");
 
-    /** Codigos ISO 3166-1 alpha-2 conhecidos pelo JDK. */
     private static final Set<String> PAISES_ISO = Set.of(Locale.getISOCountries());
 
     private final PessoaService pessoaService;
@@ -55,13 +53,6 @@ public class NacionalidadeService {
                 null);
     }
 
-    /**
-     * Converte o codigo ISO 3166-1 alpha-2 devolvido pela API publica no nome do
-     * pais, usando a base do proprio JDK (sem tabela hardcoded).
-     *
-     * <p>Se o codigo nao for um ISO conhecido, devolve o proprio codigo: e mais
-     * util para quem consome a API do que um "Regiao desconhecida" generico.
-     */
     static String nomeDoPais(String codigoIso) {
         if (codigoIso == null || codigoIso.isBlank()) {
             return codigoIso;
