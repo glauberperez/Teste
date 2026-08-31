@@ -132,19 +132,26 @@ dependência extra.
 
 ## Validações
 
-Cada endpoint tem pelo menos uma validação de tipo de dado, como exigido:
+Cada endpoint tem pelo menos uma validação de tipo de dado, como exigido, e o conjunto exercita
+**seis categorias distintas** de validação — obrigatoriedade, formato, faixa numérica, tamanho,
+regra de negócio e tipo do parâmetro:
 
-| Endpoint | Validações |
-| --- | --- |
-| `POST /registrarName` | `documento`: obrigatório + **CPF válido** (dígitos verificadores, módulo 11) · `nome`/`sobrenome`: obrigatórios, 2–60 caracteres, apenas letras · `email`: obrigatório e em formato de e-mail |
-| `GET /list` | `limite`: inteiro entre 1 e 200 |
-| `GET /list/{documento}` | `documento`: obrigatório + CPF válido |
-| `DELETE /list/{documento}` | `documento`: obrigatório + CPF válido |
-| `GET /findNacionalityByPerson/{documento}` | `documento`: obrigatório + CPF válido |
-| `POST /auth/login` | `usuario`: obrigatório, até 60 caracteres · `senha`: obrigatória, 4–100 caracteres |
+| Endpoint | Categoria demonstrada | Validações |
+| --- | --- | --- |
+| `POST /registrarName` | formato + obrigatoriedade + tamanho | `documento`: obrigatório + **CPF válido** (dígitos verificadores, módulo 11) · `nome`/`sobrenome`: obrigatórios, 2–60 caracteres, apenas letras · `email`: obrigatório e em formato de e-mail |
+| `GET /list` | faixa numérica | `limite`: inteiro entre 1 e 200 |
+| `GET /list/{documento}` | padrão definido em variável de rota | `documento`: obrigatório + CPF válido |
+| `DELETE /list/{documento}` | padrão definido em variável de rota | `documento`: obrigatório + CPF válido |
+| `GET /findNacionalityByPerson/{documento}` | padrão definido em variável de rota | `documento`: obrigatório + CPF válido |
+| `POST /auth/login` | obrigatoriedade + tamanho | `usuario`: obrigatório, até 60 caracteres · `senha`: obrigatória, 4–100 caracteres |
+
+Além das anotações acima, o tipo do parâmetro de query também é validado: `?limite=abc` responde
+`400`, e não `500`.
 
 A validação de CPF é uma constraint customizada (`@Cpf` + `CpfValidator`), não apenas um regex:
-ela confere os dígitos verificadores e rejeita sequências repetidas como `11111111111`.
+ela confere os dígitos verificadores e rejeita sequências repetidas como `11111111111`. As três
+rotas por documento compartilham essa mesma constraint de propósito — é o mesmo dado de entrada,
+e duplicar regras equivalentes só para diferenciá-las abriria espaço para divergência futura.
 
 **CPFs válidos para teste:** `52998224725`, `11144477735`, `39053344705`.
 
